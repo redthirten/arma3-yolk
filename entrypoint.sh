@@ -181,7 +181,8 @@ function RemoveDuplicates { #[Input: str - Output: printf of new str]
 sleep 1
 
 # Switch to the container's working directory
-cd /home/container || exit 1
+cd ${HOME} || exit 1
+pwd
 
 # Check for old Eggs
 if [[ -z ${PROFILING_BRANCH} ]]; then # PROFILING_BRANCH was not in the previous version
@@ -392,8 +393,8 @@ fi
 # Start the Server
 echo -e "\n${GREEN}[STARTUP]:${NC} Starting server with the following startup command:"
 echo -e "${CYAN}${modifiedStartup}${NC}\n"
-sleep 10 #DEBUG
-exit 1
+sleep 4 #DEBUG
+exit 0
 if [[ "$STARTUP_PARAMS" == *"-noLogs"* ]]; then
     ${modifiedStartup}
 else

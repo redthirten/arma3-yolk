@@ -50,16 +50,16 @@ function RunSteamCMD { #[Input: int server=0 mod=1 optional_mod=2; int id]
 
         # Check if updating server or mod
         if [[ $1 == 0 ]]; then # Server
-            # numactl --physcpubind=+0 ${steamcmdDir}/steamcmd.sh +force_install_dir /home/container "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +app_update $2 $betaBranch $validateServer +quit | tee -a "${steamcmdLog}"
-            ${steamcmdDir}/steamcmd.sh +force_install_dir ./ "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +app_update $2 ${betaBranch} ${validateServer} +quit | tee -a "${steamcmdLog}"
+            # numactl --physcpubind=+0 ${STEAMCMD_DIR}/steamcmd.sh +force_install_dir /home/container "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +app_update $2 $betaBranch $validateServer +quit | tee -a "${STEAMCMD_LOG}"
+            ${STEAMCMD_DIR}/steamcmd.sh +force_install_dir ./ "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +app_update $2 ${betaBranch} ${validateServer} +quit | tee -a "${STEAMCMD_LOG}"
         else # Mod
-            # numactl --physcpubind=+0 ${steamcmdDir}/steamcmd.sh "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +workshop_download_item $GAME_ID $2 +quit | tee -a "${steamcmdLog}"
-            ${steamcmdDir}/steamcmd.sh "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +workshop_download_item ${GAME_ID} $2 +quit | tee -a "${steamcmdLog}"
+            # numactl --physcpubind=+0 ${STEAMCMD_DIR}/steamcmd.sh "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +workshop_download_item $GAME_ID $2 +quit | tee -a "${STEAMCMD_LOG}"
+            ${STEAMCMD_DIR}/steamcmd.sh "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +workshop_download_item ${GAME_ID} $2 +quit | tee -a "${STEAMCMD_LOG}"
         fi
 
         # Error checking for SteamCMD
         steamcmdExitCode=${PIPESTATUS[0]}
-        loggedErrors=$(grep -i "error\|failed" "${steamcmdLog}" | grep -iv "setlocal\|SDL\|steamservice\|thread\|libcurl")
+        loggedErrors=$(grep -i "error\|failed" "${STEAMCMD_LOG}" | grep -iv "setlocal\|SDL\|steamservice\|thread\|libcurl")
         if [[ -n ${loggedErrors} ]]; then # Catch errors (ignore setlocale, SDL, steamservice, thread priority, and libcurl warnings)
             # Soft errors
             if [[ -n $(grep -i "Timeout downloading item" "${STEAMCMD_LOG}") ]]; then # Mod download timeout
@@ -181,7 +181,7 @@ function RemoveDuplicates { #[Input: str - Output: printf of new str]
 sleep 1
 
 # Switch to the container's working directory
-cd /home/container || exit 1
+cd ${HOME} || exit 1
 pwd
 ls -la
 

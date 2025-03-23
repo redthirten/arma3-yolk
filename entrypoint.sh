@@ -11,7 +11,7 @@ STEAMCMD_DIR="./steamcmd"                 # SteamCMD's directory containing stea
 WORKSHOP_DIR="./Steam/steamapps/workshop" # SteamCMD's directory containing workshop downloads
 STEAMCMD_LOG="${STEAMCMD_DIR}/steamcmd.log"     # Log file for SteamCMD
 GAME_ID=107410                                  # SteamCMD ID for the Arma 3 GAME (not server). Only used for Workshop mod downloads.
-EGG_URL='https://github.com/parkervcp/eggs/tree/master/game_eggs/steamcmd_servers/arma/arma3'   # URL for Pterodactyl Egg & Info (only used as info to legacy users)
+EGG_URL='https://github.com/pelican-eggs/games-steamcmd/tree/main/arma/arma3'   # URL for Pterodactyl Egg & Info (only used as info to legacy users)
 
 # Color Codes
 CYAN='\033[0;36m'
@@ -112,12 +112,12 @@ function RunSteamCMD { #[Input: int server=0 mod=1 optional_mod=2; int id]
             if [[ $1 == 0 ]]; then # Server
                 echo -e "\n${GREEN}[UPDATE]: Game server is up to date!${NC}"
             else # Mod
-                echo -e "\tMoving any mod ${CYAN}.bikey${NC} files to the ${CYAN}keys/${NC} folder..."
+                echo -e "\n\tMoving any mod ${CYAN}.bikey${NC} files to the ${CYAN}keys/${NC} folder..."
                 if [[ $1 == 1 ]]; then # Regular mod
                     # Move any .bikey's to the keys directory
                     find "${WORKSHOP_DIR}/content/${GAME_ID}/$2" -name "*.bikey" -type f -exec cp -t "keys" {} +
                     # Make a hard link copy of the downloaded mod to the current directory if it doesn't already exist
-                    echo -e "\tMaking ${CYAN}hard link${NC} copy of mod to ${CYAN}$(pwd)@$2${NC}"
+                    echo -e "\tMaking ${CYAN}hard link${NC} copy of mod to: ${CYAN}$(pwd)/@$2${NC}"
                     if [[ ! -d "@$2" ]]; then
                         mkdir @$2
                         cp -al ${WORKSHOP_DIR}/content/${GAME_ID}/$2/* @$2/
@@ -136,7 +136,7 @@ function RunSteamCMD { #[Input: int server=0 mod=1 optional_mod=2; int id]
                     rm -r ${WORKSHOP_DIR}/content/${GAME_ID}/$2
                     # Create a directory so time-based detection of auto updates works correctly
                     mkdir @${2}_optional
-                    touch "DON'T DELETE THIS DIRECTORY - USED FOR AUTO UPDATES"
+                    touch "@${2}_optional/DON'T DELETE THIS DIRECTORY - USED FOR AUTO UPDATES"
                 fi
                 echo -e "${GREEN}[UPDATE]: Mod download/update successful!${NC}"
             fi
@@ -158,7 +158,7 @@ function RunSteamCMD { #[Input: int server=0 mod=1 optional_mod=2; int id]
 
 # Takes a directory (string) as input, and recursively makes all files & folders lowercase.
 function ModsLowercase {
-    echo -e "\n\tMaking mod ${CYAN}$1${NC} files/folders lowercase..."
+    echo -e "\tMaking mod ${CYAN}$1${NC} files/folders ${CYAN}lowercase${NC}..."
     for SRC in `find ./$1 -depth`; do
         DST=`dirname "${SRC}"`/`basename "${SRC}" | tr '[A-Z]' '[a-z]'`
         if [ "${SRC}" != "${DST}" ]
@@ -182,8 +182,6 @@ sleep 1
 
 # Switch to the container's working directory
 cd ${HOME} || exit 1
-pwd
-ls -la
 
 # Check for old Eggs
 if [[ -z ${PROFILING_BRANCH} ]]; then # PROFILING_BRANCH was not in the previous version
@@ -228,10 +226,10 @@ allMods=$(echo $allMods | sed -e 's/;/ /g') # Convert from string to array
 # Update everything (server and mods), if specified
 if [[ ${UPDATE_SERVER} == 1 ]]; then
     echo -e "\n${GREEN}[STARTUP]: ${CYAN}Starting checks for all updates...${NC}"
-    echo -e "(It is okay to ignore any \"SDL\", \"steamservice\", and \"thread priority\" errors during this process)\n"
+    echo -e "\t(It is okay to ignore any \"SDL\", \"steamservice\", and \"thread priority\" errors during this process)\n"
 
     ## Update game server
-    echo -e "${GREEN}[UPDATE]:${NC} Checking for game server updates with App ID: ${CYAN}${STEAMCMD_APPID}${NC}..."
+    echo -e "${GREEN}[UPDATE]:${NC} Checking for ${CYAN}game server${NC} updates with App ID: ${CYAN}${STEAMCMD_APPID}${NC}..."
 
     # Validate will be added as a parameter if specified
     if [[ ${VALIDATE_SERVER} == 1 ]]; then
@@ -394,8 +392,6 @@ fi
 # Start the Server
 echo -e "\n${GREEN}[STARTUP]:${NC} Starting server with the following startup command:"
 echo -e "${CYAN}${modifiedStartup}${NC}\n"
-sleep 4 #DEBUG
-exit 0
 if [[ "$STARTUP_PARAMS" == *"-noLogs"* ]]; then
     ${modifiedStartup}
 else

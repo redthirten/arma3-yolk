@@ -117,8 +117,8 @@ function RunSteamCMD { #[Input: int server=0 mod=1 optional_mod=2; int id]
                     # Move any .bikey's to the keys directory
                     find "${WORKSHOP_DIR}/content/${GAME_ID}/$2" -name "*.bikey" -type f -exec cp -t "keys" {} +
                     # Make a hard link copy of the downloaded mod to the current directory if it doesn't already exist
-                    echo -e "\tMaking ${CYAN}hard link${NC} copy of mod to: ${CYAN}$(pwd)/@$2${NC}"
                     if [[ ! -d "@$2" ]]; then
+                        echo -e "\tMaking ${CYAN}hard link${NC} copy of mod to: ${CYAN}$(pwd)/@$2${NC}"
                         mkdir @$2
                         cp -al ${WORKSHOP_DIR}/content/${GAME_ID}/$2/* @$2/
                     fi
@@ -226,7 +226,7 @@ allMods=$(echo $allMods | sed -e 's/;/ /g') # Convert from string to array
 # Update everything (server and mods), if specified
 if [[ ${UPDATE_SERVER} == 1 ]]; then
     echo -e "\n${GREEN}[STARTUP]: ${CYAN}Starting checks for all updates...${NC}"
-    echo -e "\t(It is okay to ignore any \"SDL\", \"steamservice\", and \"thread priority\" errors during this process)\n"
+    echo -e "(It is okay to ignore any \"SDL\", \"steamservice\", and \"thread priority\" errors during this process)\n"
 
     ## Update game server
     echo -e "${GREEN}[UPDATE]:${NC} Checking for ${CYAN}game server${NC} updates with App ID: ${CYAN}${STEAMCMD_APPID}${NC}..."
@@ -273,7 +273,7 @@ if [[ ${UPDATE_SERVER} == 1 ]]; then
                 latestUpdate=$(curl -sL https://steamcommunity.com/sharedfiles/filedetails/changelog/$modID | grep '<p id=' | head -1 | cut -d'"' -f2)
 
                 # If the update time is valid and newer than the local directory's creation date, or the mod hasn't been downloaded yet, download the mod
-                # if [[ ! -d $modDir ]] || [[ ( -n $latestUpdate ) && ( $latestUpdate =~ ^[0-9]+$ ) && ( $latestUpdate > $(find $modDir | head -1 | xargs stat -c%Y) ) ]]; then
+                if [[ ! -d $modDir ]] || [[ ( -n $latestUpdate ) && ( $latestUpdate =~ ^[0-9]+$ ) && ( $latestUpdate > $(find $modDir | head -1 | xargs stat -c%Y) ) ]]; then
                     # Get the mod's name from the Workshop page as well
                     modName=$(curl -sL https://steamcommunity.com/sharedfiles/filedetails/changelog/$modID | grep 'workshopItemTitle' | cut -d'>' -f2 | cut -d'<' -f1)
                     if [[ -z $modName ]]; then # Set default name if unavailable
@@ -290,7 +290,7 @@ if [[ ${UPDATE_SERVER} == 1 ]]; then
                     
                     echo -e "\tAttempting mod update/download via SteamCMD...\n"
                     RunSteamCMD $modType $modID
-                # fi
+                fi
             fi
         done
 
@@ -381,9 +381,9 @@ if [[ ${HC_NUM} > 0 ]]; then
     echo -e "\n${GREEN}[STARTUP]:${NC} Starting ${CYAN}${HC_NUM}${NC} Headless Client(s)."
     for i in $(seq ${HC_NUM}); do
         if [[ ${HC_HIDE} == "1" ]]; then
-            ./${SERVER_BINARY} -client -connect=127.0.0.1 -port=${SERVER_PORT} -password="${SERVER_PASSWORD}" -profiles=./serverprofile -bepath=./battleye -mod="${clientMods}" ${STARTUP_PARAMS} > /dev/null 2>&1 &
+            ./${SERVER_BINARY} -client -connect=127.0.0.1 -port=${SERVER_PORT} -password="${SERVER_PASSWORD}" > /dev/null 2>&1 &
         else
-            ./${SERVER_BINARY} -client -connect=127.0.0.1 -port=${SERVER_PORT} -password="${SERVER_PASSWORD}" -profiles=./serverprofile -bepath=./battleye -mod="${clientMods}" ${STARTUP_PARAMS} &
+            ./${SERVER_BINARY} -client -connect=127.0.0.1 -port=${SERVER_PORT} -password="${SERVER_PASSWORD}" &
         fi
         echo -e "${GREEN}[STARTUP]:${CYAN} Headless Client $i${NC} launched."
     done
@@ -392,11 +392,12 @@ fi
 # Start the Server
 echo -e "\n${GREEN}[STARTUP]:${NC} Starting server with the following startup command:"
 echo -e "${CYAN}${modifiedStartup}${NC}\n"
-if [[ "$STARTUP_PARAMS" == *"-noLogs"* ]]; then
-    ${modifiedStartup}
-else
-    ${modifiedStartup} 2>&1 | tee -a "$LOG_FILE"
-fi
+${modifiedStartup} #DEBUG
+# if [[ "$STARTUP_PARAMS" == *"-noLogs"* ]]; then
+#     ${modifiedStartup}
+# else
+#     ${modifiedStartup} 2>&1 | tee -a "$LOG_FILE"
+# fi
 
 if [ $? -ne 0 ]; then
     echo -e "\n${RED}PTDL_CONTAINER_ERR: There was an error while attempting to run the start command.${NC}\n"

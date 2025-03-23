@@ -27,8 +27,8 @@ RUN         dpkg --add-architecture i386 \
                 lib32stdc++6 \
                 libnss-wrapper \
                 libnss-wrapper:i386 \
-                libtbb2 \
-                libtbb2:i386 \
+                libtbbmalloc2 \
+                libtbbmalloc2:i386 \
                 tini
 
 ## Configure locale

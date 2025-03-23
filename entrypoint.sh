@@ -181,7 +181,7 @@ function RemoveDuplicates { #[Input: str - Output: printf of new str]
 sleep 1
 
 # Switch to the container's working directory
-cd ${HOME} || exit 1
+cd /home/container || exit 1
 
 # Check for old Eggs
 if [[ -z ${PROFILING_BRANCH} ]]; then # PROFILING_BRANCH was not in the previous version

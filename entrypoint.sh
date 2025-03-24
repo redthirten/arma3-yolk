@@ -21,8 +21,9 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 ## === ENVIRONMENT VARS ===
-# HOME, STARTUP, STARTUP_PARAMS, STEAM_USER, STEAM_PASS, SERVER_BINARY, MOD_FILE, MODIFICATIONS, SERVERMODS, OPTIONALMODS, UPDATE_SERVER,
-# VALIDATE_SERVER, MODS_LOWERCASE, PROFILING_BRANCH, CDLC, STEAMCMD_APPID, HC_NUM, SERVER_PASSWORD, HC_HIDE, STEAMCMD_ATTEMPTS, BASIC_CFG_URL
+# HOME, STARTUP, STEAM_USER, STEAM_PASS, SERVER_BINARY, MOD_FILE, MODIFICATIONS, SERVERMODS, OPTIONALMODS, UPDATE_SERVER, VALIDATE_SERVER,
+# MODS_LOWERCASE, PROFILING_BRANCH, CDLC, STEAMCMD_APPID, HC_NUM, SERVER_PASSWORD, HC_HIDE, STEAMCMD_ATTEMPTS, BASIC_CFG_URL,
+# PARAM_NOLOGS, PARAM_AUTOINIT, PARAM_FILEPATCHING, PARAM_LOADMISSIONTOMEMORY, PARAM_LIMITFPS
 
 ## === GLOBAL VARS ===
 # validateServer, betaBranch, updateAttempt, modifiedStartup, allMods, clientMods
@@ -362,9 +363,6 @@ else
     export LD_PRELOAD=/usr/lib/i386-linux-gnu/libnss_wrapper.so
 fi
 
-# Replace Startup Variables
-modifiedStartup=`eval echo $(echo ${STARTUP} | sed -e 's/{{/${/g' -e 's/}}/}/g')`
-
 # Create server startup parameters config file
 cat > startup_params_server.txt << EOF
 // ********************************************************************
@@ -420,10 +418,14 @@ if [[ ${HC_NUM} > 0 ]]; then
     done
 fi
 
+# Replace Startup Command variables
+modifiedStartup=`eval echo $(echo ${STARTUP} | sed -e 's/{{/${/g' -e 's/}}/}/g')`
+
 # Start the Server
+serverParams=$(sed '/^\/\//d' startup_params_server.txt | tr '\n' ' ' | tr -s ' ')
 echo -e "\n${GREEN}[STARTUP]:${NC} Starting server with the following startup parameters:"
-echo -e "${CYAN}./${SERVER_BINARY} $(sed '/^\/\//d' server_startup_params.txt | tr '\n' ' ' | tr -s ' ')${NC}\n"
-if [[ "$STARTUP_PARAMS" == *"-noLogs"* ]]; then
+echo -e "${CYAN}./${SERVER_BINARY} ${serverParams}${NC}\n"
+if [[ "$PARAM_NOLOGS" == "1" ]]; then
     ${modifiedStartup}
 else
     ${modifiedStartup} 2>&1 | tee -a "$logFile"

@@ -50,10 +50,8 @@ function RunSteamCMD { #[Input: int server=0 mod=1 optional_mod=2; int id]
 
         # Check if updating server or mod
         if [[ $1 == 0 ]]; then # Server
-            # numactl --physcpubind=+0 ${STEAMCMD_DIR}/steamcmd.sh +force_install_dir /home/container "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +app_update $2 $betaBranch $validateServer +quit | tee -a "${STEAMCMD_LOG}"
             ${STEAMCMD_DIR}/steamcmd.sh +force_install_dir ${HOME} "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +app_update $2 ${betaBranch} ${validateServer} +quit | tee -a "${STEAMCMD_LOG}"
         else # Mod
-            # numactl --physcpubind=+0 ${STEAMCMD_DIR}/steamcmd.sh "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +workshop_download_item $GAME_ID $2 +quit | tee -a "${STEAMCMD_LOG}"
             ${STEAMCMD_DIR}/steamcmd.sh "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +workshop_download_item ${GAME_ID} $2 +quit | tee -a "${STEAMCMD_LOG}"
         fi
 
@@ -383,6 +381,11 @@ cat > server_startup_params.txt << EOF
 -config=server.cfg
 -mod=${clientMods}
 -serverMod=${SERVERMODS}
+$( [[ "$PARAM_loadMissionToMemory" == "1" ]] && echo "-loadMissionToMemory" )
+$( [[ "$PARAM_autoInit" == "1" ]] && echo "-autoInit" )
+$( [[ "$PARAM_filePatching" == "1" ]] && echo "-filePatching" )
+-limitFPS=${PARAM_limitFPS}
+$( [[ "$PARAM_noLogs" == "1" ]] && echo "-noLogs" )
 EOF
 
 # Create HC startup parameters config file
@@ -400,6 +403,8 @@ cat > hc_startup_params.txt << EOF
 -port=${SERVER_PORT}
 -password=${SERVER_PASSWORD}
 -mod=${clientMods}
+$( [[ "$PARAM_filePatching" == "1" ]] && echo "-filePatching" )
+-limitFPS=${PARAM_limitFPS}
 EOF
 
 # Start Headless Clients if applicable
@@ -423,7 +428,7 @@ if [[ "$STARTUP_PARAMS" == *"-noLogs"* ]]; then
 else
     ${modifiedStartup} 2>&1 | tee -a "$logFile"
 fi
-
+echo -e "\nEXIT CODE: $?" # DEBUG
 if [ $? -ne 0 ]; then
     echo -e "\n${RED}PTDL_CONTAINER_ERR: There was an error while attempting to run the start command.${NC}\n"
     exit 1

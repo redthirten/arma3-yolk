@@ -24,8 +24,8 @@ RUN         dpkg --add-architecture i386 \
                 libstdc++6 \
                 libstdc++6:i386 \
                 lib32stdc++6 \
-                # libnss-wrapper \
-                # libnss-wrapper:i386 \
+                libnss-wrapper \
+                libnss-wrapper:i386 \
                 libtbbmalloc2 \
                 libtbbmalloc2:i386 \
                 tini
@@ -35,11 +35,11 @@ RUN         update-locale lang=en_US.UTF-8 \
             && dpkg-reconfigure --frontend noninteractive locales
 
 ## Prepare NSS Wrapper for the entrypoint as a workaround for Arma 3 requiring a valid UID
-# ENV         NSS_WRAPPER_PASSWD=/tmp/passwd NSS_WRAPPER_GROUP=/tmp/group
-# RUN         touch ${NSS_WRAPPER_PASSWD} ${NSS_WRAPPER_GROUP} \
-#             && chgrp 0 ${NSS_WRAPPER_PASSWD} ${NSS_WRAPPER_GROUP} \
-#             && chmod g+rw ${NSS_WRAPPER_PASSWD} ${NSS_WRAPPER_GROUP}
-# ADD         passwd.template /passwd.template
+ENV         NSS_WRAPPER_PASSWD=/tmp/passwd NSS_WRAPPER_GROUP=/tmp/group
+RUN         touch ${NSS_WRAPPER_PASSWD} ${NSS_WRAPPER_GROUP} \
+            && chgrp 0 ${NSS_WRAPPER_PASSWD} ${NSS_WRAPPER_GROUP} \
+            && chmod g+rw ${NSS_WRAPPER_PASSWD} ${NSS_WRAPPER_GROUP}
+ADD         passwd.template /passwd.template
 
 ## Setup user and working directory
 RUN         useradd -m -d /home/container -s /bin/bash container

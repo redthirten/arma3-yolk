@@ -11,6 +11,8 @@ STEAMCMD_DIR="./steamcmd"                       # SteamCMD's directory containin
 WORKSHOP_DIR="./Steam/steamapps/workshop"       # SteamCMD's directory containing workshop downloads
 STEAMCMD_LOG="${STEAMCMD_DIR}/steamcmd.log"     # Log file for SteamCMD
 GAME_ID=107410                                  # SteamCMD ID for the Arma 3 GAME (not server). Only used for Workshop mod downloads.
+SERVER_PARAM_FILE="startup_params_server.txt"   # File name for the auto-generated server par file to be used during startup
+HC_PARAM_FILE="startup_params_hc.txt"           # File name for the auto-generated Headless Client par file to be used during startup
 EGG_URL='https://github.com/pelican-eggs/games-steamcmd/tree/main/arma/arma3'   # URL for Pterodactyl Egg & Info (only used as info to legacy users)
 
 # Color Codes
@@ -183,7 +185,7 @@ sleep 1
 cd ${HOME} || exit 1
 
 # Check for old Eggs
-if [[ -z ${PROFILING_BRANCH} ]]; then # PROFILING_BRANCH was not in the previous version
+if [[ -z ${STEAMCMD_BETAID} ]]; then # STEAMCMD_BETAID was not in the previous version
     echo -e "\n${RED}[STARTUP_ERR]: Please contact your administrator/host for support, and give them the following message:${NC}\n"
     echo -e "\t${CYAN}Your Arma 3 Egg is outdated and no longer supported.${NC}"
     echo -e "\t${CYAN}Please download the latest version at the following link, and install it in your panel:${NC}"
@@ -351,7 +353,7 @@ else
 fi
 
 # Create server startup parameters config file
-cat > startup_params_server.txt << EOF
+cat > ${SERVER_PARAM_FILE} << EOF
 // ********************************************************************
 // *                                                                  *
 // *    Server Startup Parameters Config File                         *
@@ -374,7 +376,7 @@ $( [[ "$PARAM_NOLOGS" == "1" ]] && echo "-noLogs" )
 EOF
 
 # Create HC startup parameters config file
-cat > startup_params_hc.txt << EOF
+cat > ${HC_PARAM_FILE} << EOF
 // ********************************************************************
 // *                                                                  *
 // *    Headless Client Startup Parameters Config File                *
@@ -397,9 +399,9 @@ if [[ ${HC_NUM} > 0 ]]; then
     echo -e "\n${GREEN}[STARTUP]:${NC} Starting ${CYAN}${HC_NUM}${NC} Headless Client(s)."
     for i in $(seq ${HC_NUM}); do
         if [[ ${HC_HIDE} == "1" ]]; then
-            ./${SERVER_BINARY} -par=startup_params_hc.txt > /dev/null 2>&1 &
+            ./${SERVER_BINARY} -par=${HC_PARAM_FILE} > /dev/null 2>&1 &
         else
-            ./${SERVER_BINARY} -par=startup_params_hc.txt &
+            ./${SERVER_BINARY} -par=${HC_PARAM_FILE} &
         fi
         echo -e "${GREEN}[STARTUP]:${CYAN} Headless Client $i${NC} launched."
     done
@@ -409,7 +411,7 @@ fi
 modifiedStartup=`eval echo $(echo ${STARTUP} | sed -e 's/{{/${/g' -e 's/}}/}/g')`
 
 # Start the Server
-serverParams=$(sed '/^\/\//d' startup_params_server.txt | tr '\n' ' ' | tr -s ' ')
+serverParams=$(sed '/^\/\//d' ${SERVER_PARAM_FILE} | tr '\n' ' ' | tr -s ' ')
 echo -e "\n${GREEN}[STARTUP]:${NC} Starting server with the following startup parameters:"
 echo -e "${CYAN}./${SERVER_BINARY} ${serverParams}${NC}\n"
 if [[ "$PARAM_NOLOGS" == "1" ]]; then

@@ -3,7 +3,7 @@
 ## File: Arma 3 Yolk Entrypoint - entrypoint.sh
 ## Author: David Wolfe (Red-Thirten)
 ## Contributors: Aussie Server Hosts (https://aussieserverhosts.com/), Stephen White (SilK)
-## Date: 2025/03/20
+## Date: 2025/03/24
 ## License: MIT License
 
 ## === CONSTANTS ===
@@ -22,7 +22,7 @@ NC='\033[0m' # No Color
 
 ## === ENVIRONMENT VARS ===
 # HOME, STARTUP, STEAM_USER, STEAM_PASS, SERVER_BINARY, MOD_FILE, MODIFICATIONS, SERVERMODS, OPTIONALMODS, UPDATE_SERVER, VALIDATE_SERVER,
-# MODS_LOWERCASE, PROFILING_BRANCH, CDLC, STEAMCMD_APPID, HC_NUM, SERVER_PASSWORD, HC_HIDE, STEAMCMD_ATTEMPTS, BASIC_CFG_URL,
+# MODS_LOWERCASE, STEAMCMD_APPID, STEAMCMD_BETAID, HC_NUM, SERVER_PASSWORD, HC_HIDE, STEAMCMD_ATTEMPTS, BASIC_CFG_URL,
 # PARAM_NOLOGS, PARAM_AUTOINIT, PARAM_FILEPATCHING, PARAM_LOADMISSIONTOMEMORY, PARAM_LIMITFPS
 
 ## === GLOBAL VARS ===
@@ -51,7 +51,7 @@ function RunSteamCMD { #[Input: int server=0 mod=1 optional_mod=2; int id]
 
         # Check if updating server or mod
         if [[ $1 == 0 ]]; then # Server
-            ${STEAMCMD_DIR}/steamcmd.sh +force_install_dir ${HOME} "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +app_update $2 ${betaBranch} ${validateServer} +quit | tee -a "${STEAMCMD_LOG}"
+            ${STEAMCMD_DIR}/steamcmd.sh +force_install_dir ${HOME} "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +app_update $2 $( [[ -z ${STEAMCMD_BETAID} ]] || printf %s "-beta ${STEAMCMD_BETAID}" ) $( [[ ${VALIDATE_SERVER} == 1 ]] || printf %s "validate" ) +quit | tee -a "${STEAMCMD_LOG}"
         else # Mod
             ${STEAMCMD_DIR}/steamcmd.sh "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +workshop_download_item ${GAME_ID} $2 +quit | tee -a "${STEAMCMD_LOG}"
         fi
@@ -229,26 +229,13 @@ if [[ ${UPDATE_SERVER} == 1 ]]; then
 
     ## Update game server
     echo -e "${GREEN}[UPDATE]:${NC} Checking for ${CYAN}game server${NC} updates with App ID: ${CYAN}${STEAMCMD_APPID}${NC}..."
-
-    # Validate will be added as a parameter if specified
     if [[ ${VALIDATE_SERVER} == 1 ]]; then
         echo -e "\t${CYAN}File validation enabled.${NC} (This may take extra time to complete)"
-        validateServer="validate"
-    else
-        validateServer=""
     fi
-
-    # Determine what beta branch should be set, if any
-    if [[ ${PROFILING_BRANCH} == 1 ]]; then
-        echo -e "\t${CYAN}Download/Update server profiling branch enabled.${NC}\n"
-        betaBranch="-beta profiling"
-    elif [[ ${CDLC} == 1 ]]; then
-        echo -e "\t${CYAN}Download/Update Creator DLC server files enabled.${NC}\n"
-        betaBranch="-beta creatordlc"
-    else
-        echo -e ""
-        betaBranch=""
+    if [[ -n ${STEAMCMD_BETAID} ]]; then
+        echo -e "\tDownload/Update of ${CYAN}\"${STEAMCMD_BETAID}\" branch enabled.${NC}"
     fi
+    echo -e ""
 
     RunSteamCMD 0 ${STEAMCMD_APPID}
 
@@ -431,7 +418,9 @@ else
     ${modifiedStartup} 2>&1 | tee -a "$logFile"
 fi
 
-if [ $? -ne 0 && $? -ne 130 ]; then # Exit code 130 is SIGTERM
-    echo -e "\n${RED}PTDL_CONTAINER_ERR: There was an error while attempting to run the start command.${NC}\n"
+# Check server exit code for errors
+exitCode=$?
+if [[ $exitCode -ne 0 && $exitCode -ne 130 ]]; then # Exit code 130 is SIGTERM
+    echo -e "\n${RED}[SERVER_ERR]: The server exited unexpectedly with code ${exitCode}!${NC}\n"
     exit 1
 fi

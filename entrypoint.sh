@@ -366,7 +366,7 @@ fi
 modifiedStartup=`eval echo $(echo ${STARTUP} | sed -e 's/{{/${/g' -e 's/}}/}/g')`
 
 # Create server startup parameters config file
-cat > server_startup_params.txt << EOF
+cat > startup_params_server.txt << EOF
 // ********************************************************************
 // *                                                                  *
 // *    Server Startup Parameters Config File                         *
@@ -381,15 +381,15 @@ cat > server_startup_params.txt << EOF
 -config=server.cfg
 -mod=${clientMods}
 -serverMod=${SERVERMODS}
-$( [[ "$PARAM_loadMissionToMemory" == "1" ]] && echo "-loadMissionToMemory" )
-$( [[ "$PARAM_autoInit" == "1" ]] && echo "-autoInit" )
-$( [[ "$PARAM_filePatching" == "1" ]] && echo "-filePatching" )
--limitFPS=${PARAM_limitFPS}
-$( [[ "$PARAM_noLogs" == "1" ]] && echo "-noLogs" )
+$( [[ "$PARAM_LOADMISSIONTOMEMORY" == "1" ]] && echo "-loadMissionToMemory" )
+$( [[ "$PARAM_AUTOINIT" == "1" ]] && echo "-autoInit" )
+$( [[ "$PARAM_FILEPATCHING" == "1" ]] && echo "-filePatching" )
+-limitFPS=${PARAM_LIMITFPS}
+$( [[ "$PARAM_NOLOGS" == "1" ]] && echo "-noLogs" )
 EOF
 
 # Create HC startup parameters config file
-cat > hc_startup_params.txt << EOF
+cat > startup_params_hc.txt << EOF
 // ********************************************************************
 // *                                                                  *
 // *    Headless Client Startup Parameters Config File                *
@@ -403,8 +403,8 @@ cat > hc_startup_params.txt << EOF
 -port=${SERVER_PORT}
 -password=${SERVER_PASSWORD}
 -mod=${clientMods}
-$( [[ "$PARAM_filePatching" == "1" ]] && echo "-filePatching" )
--limitFPS=${PARAM_limitFPS}
+$( [[ "$PARAM_FILEPATCHING" == "1" ]] && echo "-filePatching" )
+-limitFPS=${PARAM_LIMITFPS}
 EOF
 
 # Start Headless Clients if applicable
@@ -412,9 +412,9 @@ if [[ ${HC_NUM} > 0 ]]; then
     echo -e "\n${GREEN}[STARTUP]:${NC} Starting ${CYAN}${HC_NUM}${NC} Headless Client(s)."
     for i in $(seq ${HC_NUM}); do
         if [[ ${HC_HIDE} == "1" ]]; then
-            ./${SERVER_BINARY} -par=hc_startup_params.txt > /dev/null 2>&1 &
+            ./${SERVER_BINARY} -par=startup_params_hc.txt > /dev/null 2>&1 &
         else
-            ./${SERVER_BINARY} -par=hc_startup_params.txt &
+            ./${SERVER_BINARY} -par=startup_params_hc.txt &
         fi
         echo -e "${GREEN}[STARTUP]:${CYAN} Headless Client $i${NC} launched."
     done
@@ -422,14 +422,14 @@ fi
 
 # Start the Server
 echo -e "\n${GREEN}[STARTUP]:${NC} Starting server with the following startup parameters:"
-echo -e "${CYAN}./${SERVER_BINARY} $(sed '/^\/\//d' server_startup_params.txt | tr '\n' ' ')${NC}\n"
+echo -e "${CYAN}./${SERVER_BINARY} $(sed '/^\/\//d' server_startup_params.txt | tr '\n' ' ' | tr -s ' ')${NC}\n"
 if [[ "$STARTUP_PARAMS" == *"-noLogs"* ]]; then
     ${modifiedStartup}
 else
     ${modifiedStartup} 2>&1 | tee -a "$logFile"
 fi
-echo -e "\nEXIT CODE: $?" # DEBUG
-if [ $? -ne 0 ]; then
+
+if [ $? -ne 0 && $? -ne 130 ]; then # Exit code 130 is SIGTERM
     echo -e "\n${RED}PTDL_CONTAINER_ERR: There was an error while attempting to run the start command.${NC}\n"
     exit 1
 fi

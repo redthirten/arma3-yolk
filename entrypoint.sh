@@ -354,15 +354,15 @@ if [[ ! -f basic.cfg ]]; then
 fi
 
 # Setup NSS Wrapper for use ($NSS_WRAPPER_PASSWD and $NSS_WRAPPER_GROUP have been set by the Dockerfile)
-export USER_ID=$(id -u)
-export GROUP_ID=$(id -g)
-envsubst < /passwd.template > ${NSS_WRAPPER_PASSWD}
+# export USER_ID=$(id -u)
+# export GROUP_ID=$(id -g)
+# envsubst < /passwd.template > ${NSS_WRAPPER_PASSWD}
 
-if [[ ${SERVER_BINARY} == *"x64"* ]]; then # Check which libnss-wrapper architecture to run, based off the server binary name
-    export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libnss_wrapper.so
-else
-    export LD_PRELOAD=/usr/lib/i386-linux-gnu/libnss_wrapper.so
-fi
+# if [[ ${SERVER_BINARY} == *"x64"* ]]; then # Check which libnss-wrapper architecture to run, based off the server binary name
+#     export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libnss_wrapper.so
+# else
+#     export LD_PRELOAD=/usr/lib/i386-linux-gnu/libnss_wrapper.so
+# fi
 
 # Replace Startup Variables
 modifiedStartup=`eval echo $(echo ${STARTUP} | sed -e 's/{{/${/g' -e 's/}}/}/g')`

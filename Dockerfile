@@ -3,7 +3,7 @@ FROM        --platform=$TARGETOS/$TARGETARCH debian:bookworm-slim
 LABEL       author="David Wolfe (Red-Thirten)" maintainer="red_thirten@yahoo.com"
 
 LABEL       org.opencontainers.image.source="https://github.com/pelican-eggs/yolks"
-LABEL       org.opencontainers.image.licenses=MIT
+LABEL       org.opencontainers.image.licenses=AGPL-3.0-or-later
 
 ## Update base packages and install dependencies
 ENV         DEBIAN_FRONTEND=noninteractive

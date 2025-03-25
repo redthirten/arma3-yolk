@@ -40,7 +40,7 @@ NC='\033[0m' # No Color
 # PARAM_NOLOGS, PARAM_AUTOINIT, PARAM_FILEPATCHING, PARAM_LOADMISSIONTOMEMORY, PARAM_LIMITFPS
 
 ## === GLOBAL VARS ===
-# validateServer, betaBranch, updateAttempt, modifiedStartup, allMods, clientMods
+# updateAttempt, modifiedStartup, allMods, clientMods
 
 ## === DEFINE FUNCTIONS ===
 
@@ -83,7 +83,7 @@ function RunSteamCMD { #[Input: int server=0 mod=1 optional_mod=2; int id]
                 echo -e "\t(Steam servers may currently be down, or a connection cannot be made reliably)"
             # Hard errors
             elif [[ -n $(grep -i "Password check for AppId" "${STEAMCMD_LOG}") ]]; then # Incorrect beta branch password
-                echo -e "\n${RED}[UPDATE]: ${YELLOW}Incorrect password given for beta branch \"${betaBranch}\". ${CYAN}Skipping download...${NC}"
+                echo -e "\n${RED}[UPDATE]: ${YELLOW}Incorrect password given for beta branch \"${STEAMCMD_BETAID}\". ${CYAN}Skipping download...${NC}"
                 echo -e "\t(Please contact the maintainer of this image; an update may be required)"
                 break
             # Fatal errors

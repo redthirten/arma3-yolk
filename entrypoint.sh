@@ -422,11 +422,12 @@ fi
 
 # Replace Startup Command variables
 modifiedStartup=`eval echo $(echo ${STARTUP} | sed -e 's/{{/${/g' -e 's/}}/}/g')`
+# Convert PAR file to single-line string
+serverParams=$(sed '/^\/\//d' ${SERVER_PARAM_FILE} | tr '\n' ' ' | tr -s ' ')
 
 # Start the Server
-serverParams=$(sed '/^\/\//d' ${SERVER_PARAM_FILE} | tr '\n' ' ' | tr -s ' ')
 echo -e "\n${GREEN}[STARTUP]:${NC} Starting server with the following startup parameters:"
-echo -e "${CYAN}./${SERVER_BINARY} ${serverParams}${NC}\n"
+echo -e "${modifiedStartup/-par=${SERVER_PARAM_FILE}/$serverParams}\n"
 if [[ "$PARAM_NOLOGS" == "1" ]]; then
     ${modifiedStartup}
 else

@@ -428,7 +428,7 @@ serverParams=$(sed '/^\/\//d' ${SERVER_PARAM_FILE} | tr '\n' ' ' | tr -s ' ')
 
 # Start the Server
 echo -e "\n${GREEN}[STARTUP]:${NC} Starting server with the following startup parameters:"
-echo -e "${modifiedStartup/-par=${SERVER_PARAM_FILE}/$serverParams}\n"
+echo -e "${CYAN}${modifiedStartup/-par=${SERVER_PARAM_FILE}/$serverParams}${NC}\n"
 if [[ "$PARAM_NOLOGS" == "1" ]]; then
     ${modifiedStartup}
 else

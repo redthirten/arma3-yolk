@@ -138,8 +138,6 @@ if [[ "${windows}" == "1" ]]; then
     echo "@sSteamCmdForcePlatformType windows" >> ${STEAMCMD_SCRIPT}
 fi
 
-echo "force_install_dir ${installDir}" >> ${STEAMCMD_SCRIPT}
-
 # Set default credential if empty string is somehow passed
 if [ "${user}" == "" ]; then
     echo -e "\tSteam user is not set. Defaulting to anonymous user."
@@ -205,7 +203,7 @@ while (( $updateAttempt < $attempts )); do
     fi
 
     # Run SteamCMD with script file
-    ${STEAMCMD_DIR}/steamcmd.sh +login "${user}" "${pass}" "${auth}" +runscript ${STEAMCMD_SCRIPT}
+    ${STEAMCMD_DIR}/steamcmd.sh +force_install_dir ${installDir} +login "${user}" "${pass}" "${auth}" +runscript ${STEAMCMD_SCRIPT}
     # echo -e "Running SteamCMD..."
 
     # Error checking for SteamCMD

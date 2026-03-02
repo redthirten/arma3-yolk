@@ -1,4 +1,4 @@
-FROM        --platform=$TARGETOS/$TARGETARCH debian:bookworm-slim
+FROM        --platform=$TARGETOS/$TARGETARCH debian:trixie-slim
 
 LABEL       author="David Wolfe (Red-Thirten)" maintainer="red_thirten@yahoo.com"
 
@@ -11,24 +11,21 @@ RUN         dpkg --add-architecture i386 \
             && apt-get update \
             && apt-get upgrade -y \
             && apt-get install -y \
+                # Basic packages
                 curl \
                 tzdata \
                 locales \
-                iproute2 \
                 gettext-base \
                 ca-certificates \
-                libssl-dev \
+                tini \
+                # SteamCMD req. packages
                 lib32gcc-s1 \
-                libsdl2-2.0-0 \
-                libsdl2-2.0-0:i386 \
-                libstdc++6 \
-                libstdc++6:i386 \
-                lib32stdc++6 \
+                # Arma 3 req. packages
                 libnss-wrapper \
                 libnss-wrapper:i386 \
+                # Arma 3 opt. packages (eg. DB mods)
                 libtbbmalloc2 \
-                libtbbmalloc2:i386 \
-                tini
+                libtbbmalloc2:i386
 
 ## Configure locale
 RUN         update-locale lang=en_US.UTF-8 \

@@ -241,7 +241,6 @@ for m in "${allMods[@]}"; do # Make array of only workshop mods
         allWorkshopMods+=("$m")
     fi
 done
-echo -e "[DEBUG] All workshop mods: ${allWorkshopMods[@]}"
 
 # Update everything (server and mods), if specified
 if [[ ${UPDATE_SERVER} == 1 ]]; then
@@ -265,6 +264,7 @@ if [[ ${UPDATE_SERVER} == 1 ]]; then
         --pass ${STEAM_PASS} \
         --app-id ${STEAMCMD_APPID} \
         --beta-id ${STEAMCMD_BETAID} \
+        --add-redist "0" \
         --validate ${VALIDATE_SERVER} \
         --mods-app-id ${GAME_ID} \
         -- $(echo $allMods | sed -e 's/@//g')

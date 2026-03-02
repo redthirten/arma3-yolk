@@ -145,7 +145,7 @@ if [ "${user}" == "" ]; then
     echo -e "\tSteam user is not set. Defaulting to anonymous user."
     user="anonymous"
 fi
-echo "login \"${user}\" \"${pass}\" \"${auth}\"" >> ${STEAMCMD_SCRIPT}
+# (We don't write credentials to plain text file)
 
 if [[ "${validate}" == "1" ]]; then
     echo -e "\t${CYAN}File validation enabled.${NC} (This may take extra time to complete)"
@@ -185,6 +185,8 @@ if [[ -n "${modsAppID}" && ${#mods[@]} -gt 0 ]]; then
     done
 fi
 
+echo "quit" >> ${STEAMCMD_SCRIPT}
+
 # Clear previous SteamCMD log if present
 if [[ -f "${STEAMCMD_LOG}" ]]; then
     rm -f "${STEAMCMD_LOG:?}"
@@ -203,7 +205,7 @@ while (( $updateAttempt < $attempts )); do
     fi
 
     # Run SteamCMD with script file
-    ${STEAMCMD_DIR}/steamcmd.sh +runscript ${STEAMCMD_SCRIPT}
+    ${STEAMCMD_DIR}/steamcmd.sh +login "${user}" "${pass}" "${auth}" +runscript ${STEAMCMD_SCRIPT}
     # echo -e "Running SteamCMD..."
 
     # Error checking for SteamCMD

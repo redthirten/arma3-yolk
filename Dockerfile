@@ -52,7 +52,8 @@ WORKDIR     /home/container
 
 ## Copy over entrypoint.sh and set permissions
 COPY        --chown=container:container ./entrypoint.sh /entrypoint.sh
-RUN         chmod +x /entrypoint.sh
+COPY        --chown=container:container ./steamcmd.sh /steamcmd.sh
+RUN         chmod +x /entrypoint.sh /steamcmd.sh
 
 ## Start with Tini to pass future stop signals correctly
 STOPSIGNAL  SIGINT

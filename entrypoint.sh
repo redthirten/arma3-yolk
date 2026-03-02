@@ -267,7 +267,7 @@ if [[ ${UPDATE_SERVER} == 1 ]]; then
         --add-redist "0" \
         --validate ${VALIDATE_SERVER} \
         --mods-app-id ${GAME_ID} \
-        -- $(echo $allMods | sed -e 's/@//g')
+        -- $(echo $allWorkshopMods | sed -e 's/@//g')
 
     ## Update mods
     # if [[ -n $allMods ]]; then

@@ -21,6 +21,12 @@ RUN         dpkg --add-architecture i386 \
                 # SteamCMD req. packages
                 lib32gcc-s1 \
                 # Arma 3 req. packages
+                # libssl-dev \
+                # libsdl2-2.0-0 \
+                # libsdl2-2.0-0:i386 \
+                # libstdc++6 \
+                # libstdc++6:i386 \
+                # lib32stdc++6 \
                 libnss-wrapper \
                 libnss-wrapper:i386 \
                 # Arma 3 opt. packages (eg. DB mods)

@@ -185,9 +185,9 @@ fi
 
 
 # Debug: Print runscript contents
-echo -e "${GREEN}===== STEAMCMD SCRIPT ====="
+echo -e "${GREEN}===== STEAMCMD SCRIPT =====${NC}"
 cat ${STEAMCMD_SCRIPT}
-echo -e "${GREEN}==========================="
+echo -e "${GREEN}===========================${NC}"
 
 echo "quit" >> ${STEAMCMD_SCRIPT}
 

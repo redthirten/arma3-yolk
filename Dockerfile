@@ -1,6 +1,6 @@
 FROM        --platform=$TARGETOS/$TARGETARCH debian:trixie-slim
 
-LABEL       author="David Wolfe (Red-Thirten)" maintainer="red_thirten@yahoo.com"
+LABEL       author="David Wolfe (Red-Thirten) & C. McCarthy" maintainer="red_thirten@yahoo.com"
 
 LABEL       org.opencontainers.image.source="https://github.com/pelican-eggs/yolks"
 LABEL       org.opencontainers.image.licenses=AGPL-3.0-or-later
@@ -25,8 +25,12 @@ RUN         dpkg --add-architecture i386 \
                 # libsdl2-2.0-0 \
                 # libsdl2-2.0-0:i386 \
                 # libstdc++6 \
-                # libstdc++6:i386 \
-                # lib32stdc++6 \
+                # Arma 3 networking libraries
+                libavahi-common3 \
+                libavahi-client3 \
+                libstdc++6:i386 \
+                libgcc-s1:i386 \
+                libc6:i386 \
                 libnss-wrapper \
                 libnss-wrapper:i386 \
                 # Arma 3 opt. packages (eg. DB mods)

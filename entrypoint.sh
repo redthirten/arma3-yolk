@@ -19,8 +19,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ## === CONSTANTS ===
-STEAMCMD_DIR="./steamcmd"                       # SteamCMD's directory containing steamcmd.sh
-WORKSHOP_DIR="./Steam/steamapps/workshop"       # SteamCMD's directory containing workshop downloads
+STEAMCMD_DIR="${HOME}/steamcmd"                       # SteamCMD's directory containing steamcmd.sh
+WORKSHOP_DIR="${HOME}/steamapps/workshop"       # SteamCMD's directory containing workshop downloads CHANGED DUE TO NEW INSTALL DIR
 STEAMCMD_LOG="${STEAMCMD_DIR}/steamcmd.log"     # Log file for SteamCMD
 GAME_ID=107410                                  # SteamCMD ID for the Arma 3 GAME (not server). Only used for Workshop mod downloads.
 SERVER_PARAM_FILE="startup_params_server.txt"   # File name for the auto-generated server par file to be used during startup
@@ -234,7 +234,8 @@ fi
 allMods+=$clientMods # Add all client-side mods to the master mod list
 clientMods=$(RemoveDuplicates ${clientMods}) # Remove duplicate mods from clientMods, if present
 allMods=$(RemoveDuplicates ${allMods}) # Remove duplicate mods from allMods, if present
-allMods=$(echo $allMods | sed -e 's/;/ /g') # Convert from string to array
+# allMods=$(echo $allMods | sed -e 's/;/ /g') # Convert from string to array OLD
+IFS=';' read -ra allMods <<< "${allMods}" # Convert from string to array NEW
 allWorkshopMods=()
 for m in "${allMods[@]}"; do # Make array of only workshop mods
     if [[ "$m" =~ ^[@0-9]+$ ]]; then
@@ -257,6 +258,8 @@ if [[ ${UPDATE_SERVER} == 1 ]]; then
     # fi
     # echo -e ""
 
+
+
     # RunSteamCMD 0 ${STEAMCMD_APPID}
     /steamcmd.sh \
         --attempts $STEAMCMD_ATTEMPTS \
@@ -267,7 +270,7 @@ if [[ ${UPDATE_SERVER} == 1 ]]; then
         --add-redist "0" \
         --validate ${VALIDATE_SERVER} \
         --mods-app-id ${GAME_ID} \
-        -- $(echo $allWorkshopMods | sed -e 's/@//g')
+        -- $(echo ${allWorkshopMods[@]} | sed -e 's/@//g')
 
     ## Update mods
     # if [[ -n $allMods ]]; then
@@ -338,6 +341,53 @@ if [[ ${UPDATE_SERVER} == 1 ]]; then
 
     #     echo -e "${GREEN}[UPDATE]:${NC} Steam Workshop mod update check ${GREEN}complete${NC}!"
     # fi
+    
+    echo -e "\n${GREEN}[MODS]:${NC} Processing mods (keys + links)..."
+
+    # Ensure the "keys" directory exists
+    mkdir -p keys
+
+    # Loop through all workshop mods
+    for modID in "${allWorkshopMods[@]}"; do
+
+        # Remove "@" if present
+        cleanID="${modID//@/}"
+
+        # Source path = where SteamCMD downloads mods
+        source="${WORKSHOP_DIR}/content/${GAME_ID}/${cleanID}"
+
+        # Destination path = where Arma expects mods
+        dest="@${cleanID}"
+
+        # Check if the mod exists in the steam workshop folder 
+        if [[ ! -d "$source" ]]; then
+            echo -e "\t${RED}Mod ${cleanID} missing from workshop folder!${NC}"
+            continue
+        fi
+
+        echo -e "\tLinking mod ${CYAN}${cleanID}${NC}..."
+
+        # Find all .bikey files inside the workshop mod and copy them into ./keys/
+        find "$source" -name "*.bikey" -type f -exec cp -t "keys/" {} +
+
+        # Remove any existing mod folder in the server root
+        rm -rf "$dest"
+
+        # Recreate the destination mod directory
+        mkdir -p "$dest"
+
+        # Create a hardlink copy of the mod files into the server directory
+        cp -al "$source/"* "$dest/"
+
+        # Make mods lowercase, if specified
+        if [[ ${MODS_LOWERCASE} == "1" ]]; then
+            ModsLowercase "$dest"
+        fi
+
+    done
+
+    # Final status message
+    echo -e "${GREEN}[MODS]: Done!${NC}"
 fi
 
 # Check if specified server binary exists.
@@ -348,13 +398,6 @@ if [[ ! -f ${SERVER_BINARY} ]]; then
     echo -e "\t${CYAN}- Ensure your server has properly installed/updated without errors (reinstalling/updating again may help).${NC}"
     echo -e "\t${CYAN}- Use the File Manager to check that your specified server binary file is not missing from `$(pwd)`.${NC}\n"
     exit 1
-fi
-
-# Make mods lowercase, if specified
-if [[ ${MODS_LOWERCASE} == "1" ]]; then
-    for modDir in $allMods; do
-        ModsLowercase $modDir
-    done
 fi
 
 # Define the log file path with a timestamp

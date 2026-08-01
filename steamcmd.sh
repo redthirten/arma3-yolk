@@ -32,7 +32,7 @@
 
 ## === CONSTANTS ===
 STEAMCMD_DIR="${HOME}/steamcmd"                 # SteamCMD's directory containing steamcmd.sh
-WORKSHOP_DIR="${HOME}/Steam/steamapps/workshop" # SteamCMD's directory containing workshop downloads
+WORKSHOP_DIR="${HOME}/steamapps/workshop" # SteamCMD's directory containing workshop downloads CHANGED DUE TO NEW INSTALL DIR
 STEAMCMD_SCRIPT="${STEAMCMD_DIR}/runscript.txt" # Runscript file for SteamCMD (contains all commands SteamCMD will run)
 STEAMCMD_LOG="${STEAMCMD_DIR}/steamcmd.log"     # Log file for SteamCMD
 
@@ -183,6 +183,12 @@ if [[ -n "${modsAppID}" && ${#mods[@]} -gt 0 ]]; then
     done
 fi
 
+
+# Debug: Print runscript contents
+echo -e "${GREEN}===== STEAMCMD SCRIPT =====${NC}"
+cat ${STEAMCMD_SCRIPT}
+echo -e "${GREEN}===========================${NC}"
+
 echo "quit" >> ${STEAMCMD_SCRIPT}
 
 # Clear previous SteamCMD log if present
@@ -203,7 +209,7 @@ while (( $updateAttempt < $attempts )); do
     fi
 
     # Run SteamCMD with script file
-    ${STEAMCMD_DIR}/steamcmd.sh +force_install_dir ${installDir} +login "${user}" "${pass}" "${auth}" +runscript ${STEAMCMD_SCRIPT}
+    ${STEAMCMD_DIR}/steamcmd.sh +force_install_dir ${installDir} +login "${user}" "${pass}" "${auth}" +runscript ${STEAMCMD_SCRIPT} | tee -a "${STEAMCMD_LOG}"
     # echo -e "Running SteamCMD..."
 
     # Error checking for SteamCMD

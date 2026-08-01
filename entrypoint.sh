@@ -354,7 +354,6 @@ if [[ ${UPDATE_SERVER} == 1 ]]; then
         cleanID="${modID//@/}"
 
         # Source path = where SteamCMD downloads mods
-        echo -e "${WORKSHOP_DIR}/content/${GAME_ID}/${cleanID}" # TEMP DEBUG
         source="${WORKSHOP_DIR}/content/${GAME_ID}/${cleanID}"
 
         # Destination path = where Arma expects mods
